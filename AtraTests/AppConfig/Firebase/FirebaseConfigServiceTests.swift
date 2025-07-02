@@ -10,30 +10,31 @@ import Testing
 @testable import Atra
 
 struct FirebaseConfigServiceTests {
-    let fetcher: MockFirebaseFetcher
-    let service: FirebaseConfigService
-    
-    init() {
-        self.fetcher = MockFirebaseFetcher()
-        service = FirebaseConfigService(fetcher: fetcher)
-    }
-    
     @Test
     func testConfigureSetsSettings() {
-        let mockFetcher = MockFirebaseFetcher()
-        let service = FirebaseConfigService(fetcher: mockFetcher)
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test1") { fetcher }
         service.configure()
-        #expect(mockFetcher.configSettings.minimumFetchInterval == 3600)
+        
+        #expect(fetcher.configSettings.minimumFetchInterval == 3600)
     }
 
     @Test
     func testFetchSuccess() async throws {
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test2") { fetcher }
+        service.configure()
+        
         fetcher.applyUpdatesResult = (true, nil)
         try await service.fetch()
     }
     
     @Test
     func testFetchFailed() async {
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test3") { fetcher }
+        service.configure()
+        
         let mockError = URLError(.badURL)
         
         fetcher.fetchResult = .failure(mockError)
@@ -53,6 +54,10 @@ struct FirebaseConfigServiceTests {
 
     @Test
     func testFetchValueSuccess() throws {
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test4") { fetcher }
+        service.configure()
+        
         let key = AppConfigKey.version
         let value = "1.0.0"
         
@@ -65,6 +70,10 @@ struct FirebaseConfigServiceTests {
     
     @Test
     func testFetchValueFailure() {
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test5") { fetcher }
+        service.configure()
+        
         let key = AppConfigKey.version
         let value = "1"
         
@@ -85,6 +94,10 @@ struct FirebaseConfigServiceTests {
     
     @Test
     func testUpdateListenerSuccess() async throws {
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test6") { fetcher }
+        service.configure()
+        
         let expectedResult = MockRemoteConfigUpdate()
         let expectedMessage: Set<String> = ["version"]
         
@@ -100,6 +113,10 @@ struct FirebaseConfigServiceTests {
     
     @Test
     func testUpdateListenerFailure() async {
+        let fetcher = MockFirebaseFetcher()
+        let service = FirebaseConfigService(with: "Test7") { fetcher }
+        service.configure()
+        
         let expectedError = URLError(.unknown)
         fetcher.updateResult = (nil, expectedError)
         

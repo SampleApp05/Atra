@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
-import FirebaseRemoteConfig
 
 extension Notification.Name {
     static let versionUpdated = Notification.Name("versionUpdated")
@@ -15,13 +13,13 @@ extension Notification.Name {
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-//    let configService: ConfigService = FirebaseConfigService()
+    let configService: ConfigService = FirebaseConfigService()
     
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-//        configService.configure()
+        configService.configure()
         return true
     }
 }
