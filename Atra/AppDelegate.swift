@@ -7,13 +7,21 @@
 
 import SwiftUI
 import Firebase
+import FirebaseRemoteConfig
+
+extension Notification.Name {
+    static let versionUpdated = Notification.Name("versionUpdated")
+    static let watchlistAPIKeyUpdated = Notification.Name("watchlistAPIKeyUpdated")
+}
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+//    let configService: ConfigService = FirebaseConfigService()
+    
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-        FirebaseApp.configure()
+//        configService.configure()
         return true
     }
 }
