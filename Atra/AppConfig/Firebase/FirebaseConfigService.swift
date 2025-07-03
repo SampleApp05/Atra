@@ -8,19 +8,10 @@
 import Firebase
 import FirebaseRemoteConfig
 
-typealias FirebaseInitClosure = () -> FirebaseConfigFetcher
-
 final class FirebaseConfigService: ConfigService {
-    private let fetcherBuilder: FirebaseInitClosure
-    private var _fetcher: FirebaseConfigFetcher?
+    typealias FetcherBuilderClosure = () -> FirebaseConfigFetcher
     
-    var fetcher: FirebaseConfigFetcher {
-        guard let fetcher = _fetcher else {
-            preconditionFailure("FirebaseConfigService not configured. Call configure() before using.")
-        }
-        
-        return fetcher
-    }
+    private(set) var fetcher: FirebaseConfigFetcher
     
     private(set) lazy var updateStream: AsyncThrowingStream<Set<String>, Error> = {
         AsyncThrowingStream { (continuation) in
@@ -64,9 +55,9 @@ final class FirebaseConfigService: ConfigService {
     ///   - fetcher: A closure returning a `FirebaseConfigFetcher` instance, used for dependency injection and testing. Defaults to the shared `RemoteConfig` instance.
     ///
     /// - Note: The Firebase app is configured during initialization, using the provided name if available.
-    init(with name: String? = nil, fetcher: @escaping FirebaseInitClosure = { RemoteConfig.remoteConfig() }) {
-        self.fetcherBuilder = fetcher
-        configure(with: name)
+    init(with name: String? = nil, fetcher: @escaping FetcherBuilderClosure = { RemoteConfig.remoteConfig() }) {
+        Self.configure(with: name)
+        self.fetcher = fetcher()
     }
     
     // MARK: - Private
@@ -76,7 +67,7 @@ final class FirebaseConfigService: ConfigService {
     /// - Parameter name: An optional name for the Firebase app. If specified, configures a named app using default options. Otherwise, configures the default app.
     ///
     /// - Important: This method is called during initialization and should not be called directly.
-    private func configure(with name: String?) {
+    private static func configure(with name: String?) {
         if let name = name, let options = FirebaseOptions.defaultOptions() {
             FirebaseApp.configure(name: name, options: options)
             return
@@ -87,11 +78,9 @@ final class FirebaseConfigService: ConfigService {
     
     // MARK: - Public
     func configure() {
-        _fetcher = fetcherBuilder()
-        
         let settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 3600 // 1 hour
-        _fetcher?.configSettings = settings
+        fetcher.configSettings = settings
     }
     
     func fetch() async throws {
