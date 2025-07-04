@@ -41,6 +41,8 @@
 		8B1F05A52E0BFF57008A51AE /* Exceptions for "AtraTests" folder in "Atra" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AppConfig/Firebase/Mocks/MockRemoteConfigUpdate.swift,
+				AppConfig/Firebase/Mocks/MockRemoteConfigValue.swift,
 				REST/RESTClientTests/MockNetworkConnector.swift,
 			);
 			target = 8BC6E0C32E03EEC100173F9B /* Atra */;

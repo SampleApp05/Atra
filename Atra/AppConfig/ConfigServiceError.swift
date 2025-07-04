@@ -9,8 +9,11 @@ import Foundation
 
 enum ConfigServiceError: LocalizedError {
     case fetchFailed(Error?)
-    case keyMissing(AppConfigKey)
     case decodingFailed(AppConfigKey, Error)
+    case keyNotFound(String)
+}
+
+enum ConfigServiceUpdateError: LocalizedError {
     case updateFailed(Error)
     case updateListMissing
     case updateListEmpty

@@ -17,28 +17,28 @@ final class FirebaseConfigService: ConfigService {
         AsyncThrowingStream { (continuation) in
             fetcher.addUpdateListener { [weak self] (update, error) in
                 if let error = error {
-                    continuation.yield(with: .failure(ConfigServiceError.updateFailed(error)))
+                    continuation.yield(with: .failure(ConfigServiceUpdateError.updateFailed(error)))
                     return
                 }
                 
                 guard let keys = update?.updatedKeys else {
-                    continuation.yield(with: .failure(ConfigServiceError.updateListMissing))
+                    continuation.yield(with: .failure(ConfigServiceUpdateError.updateListMissing))
                     return
                 }
                 
                 guard keys.isEmpty == false else {
-                    continuation.yield(with: .failure(ConfigServiceError.updateListEmpty))
+                    continuation.yield(with: .failure(ConfigServiceUpdateError.updateListEmpty))
                     return
                 }
                 
                 self?.fetcher.applyUpdates { (success, error) in
                     if let error = error {
-                        continuation.yield(with: .failure(ConfigServiceError.activationFailed(error)))
+                        continuation.yield(with: .failure(ConfigServiceUpdateError.activationFailed(error)))
                         return
                     }
                     
                     guard success else {
-                        continuation.yield(with: .failure(ConfigServiceError.activationFailed(nil)))
+                        continuation.yield(with: .failure(ConfigServiceUpdateError.activationFailed(nil)))
                         return
                     }
                     

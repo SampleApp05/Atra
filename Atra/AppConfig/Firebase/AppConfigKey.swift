@@ -9,13 +9,13 @@ import Foundation
 
 enum AppConfigKey: String {
     case version
-    case wathclistAPIKey = "watchlist_api_key"
+    case watchlistAPIKey = "watchlist_api_key"
     
     var notificationName: Notification.Name {
         switch self {
         case .version:
             return .versionUpdated
-        case .wathclistAPIKey:
+        case .watchlistAPIKey:
             return .watchlistAPIKeyUpdated
         }
     }

@@ -125,7 +125,7 @@ struct FirebaseConfigServiceTests {
                 print("Message: \(message)")
             }
         } throws: { (error) in
-            guard let configError = error as? ConfigServiceError,
+            guard let configError = error as? ConfigServiceUpdateError,
                     case .updateFailed(let thrownError) = configError,
                   (thrownError as? URLError) == expectedError else {
                 return false

@@ -13,7 +13,7 @@ struct AtraApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(configService: delegate.configService)
         }
     }
 }
