@@ -74,7 +74,7 @@ struct WebSocketServiceTests {
             return true
         }
         
-        #expect(connector.task.closeCode == .internalServerError)
+        #expect(connector.task.closeCode.rawValue == URLSessionWebSocketTask.CloseCode.internalServerError.rawValue)
     }
     
     @Test func testConnectResumesTask() async {

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct RequestBuilder {
     // MARK: - Errors
@@ -20,7 +21,7 @@ struct RequestBuilder {
     // MARK: - Private
     private static func validateURL(_ url: URL) throws {
         guard let scheme = url.scheme, ["http", "https"].contains(scheme.lowercased()),
-              let host = url.host, host.isEmpty == false else {
+              let host = url.host, host.isEmpty == false, UIApplication.shared.canOpenURL(url) else {
             throw RequestError.invalidURL
         }
     }

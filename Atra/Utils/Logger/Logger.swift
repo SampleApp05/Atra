@@ -18,6 +18,7 @@ actor Logger {
     private var logs: [LogEvent] = []
     private var sourceLogs: [String: [LogEvent]] = [:]
     
+    // MARK: - Private
     private func pruneLogsIfNeeded(source: String) {
         if logs.count >= maxEventCount {
             logs.removeFirst(logs.count - maxEventCount + 1)
@@ -33,10 +34,31 @@ actor Logger {
         return sourceLogs[source] ?? []
     }
     
-    func addEvent(_ event: LogEvent) {
+    private func addEvent(_ event: LogEvent) {
         pruneLogsIfNeeded(source: event.source)
         logs.append(event)
         sourceLogs[event.source, default: []].append(event)
+        
+        print("📝 \(event.timestamp) [\(event.source)] \(event.variant.rawValue): \(event.message)")
+    }
+    
+    // MARK: - Public
+    func log(
+        timestamp: Date = .init(),
+        source: String,
+        variant: LogEventVariant,
+        message: String
+    ) {
+#if DEBUG
+        let event = LogEvent(
+            timestamp: timestamp,
+            source: source,
+            variant: variant,
+            message: message,
+            data: nil
+        )
+        addEvent(event)
+#endif
     }
     
     func log<T: Encodable>(
@@ -44,11 +66,11 @@ actor Logger {
         source: String,
         variant: LogEventVariant,
         message: String,
-        data: T? = nil
+        data: T
     ) {
 #if DEBUG
         do {
-            let encodedData = try data.map { try JSONEncoder().encode($0) }
+            let encodedData = try JSONEncoder().encode(data)
             let event = LogEvent(
                 timestamp: timestamp,
                 source: source,

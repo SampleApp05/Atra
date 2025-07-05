@@ -12,7 +12,7 @@ enum WebSocketError: LocalizedError {
     case socketError(Error)
 }
 
-actor WebSocketService: WebSocketClient {
+actor WebSocketService: WebSocketClient, Loggable {
     struct Config {
         let url: URL
         let protocols: [String]
@@ -48,18 +48,21 @@ actor WebSocketService: WebSocketClient {
     func handleSocketMessage(continuation: WebSocketStream.Continuation) async {
         guard let webSocketTask else {
             continuation.finish(throwing: WebSocketError.taskDisconnected)
+            
+            log(variant: .critical, message: "WebSocket task is nil. Cannot handle messages.")
             return
         }
         
         while true {
             do {
                 let message = try await webSocketTask.receive()
+                
+                log(variant: .info, message: "Received message: \(message)")
                 continuation.yield(message)
             } catch {
-                
-                print("WebSocket error: \(error.localizedDescription)")
                 continuation.finish(throwing: WebSocketError.socketError(error))
                 
+                log(variant: .critical, message: "WebSocket task disconnected with error: \(error.localizedDescription)")
                 disconnect(with: .internalServerError)
             }
         }
@@ -69,10 +72,13 @@ actor WebSocketService: WebSocketClient {
     func connect() {
         webSocketTask = webSocketConnector.webSocketTask(for: config.url, protocols: config.protocols)
         webSocketTask?.resume()
+        
+        log(variant: .info, message: "WebSocket task started for URL: \(config.url)")
     }
     
     func disconnect(with code: URLSessionWebSocketTask.CloseCode = .normalClosure) {
         webSocketTask?.cancel(with: code, reason: nil)
+        log(variant: .info, message: "WebSocket task disconnected with code: \(code.rawValue)")
     }
     
     func send(_ message: WebSocketMessage) async throws {
@@ -81,5 +87,6 @@ actor WebSocketService: WebSocketClient {
         }
         
         try await webSocketTask.send(message)
+        log(variant: .info, message: "WebSocket message sent: \(message)")
     }
 }

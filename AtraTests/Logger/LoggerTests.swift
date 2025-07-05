@@ -14,22 +14,17 @@ struct LoggerTests {
     func testAddEventAndFetchLogs() async {
         let logger = Logger()
         let timestamp = Date()
+        let source = "TestSource"
+        let message = "Test Message"
         
-        let event = LogEvent(
-            timestamp: timestamp,
-            source: "TestSource",
-            variant: .info,
-            message: "Test message",
-            data: nil
-        )
-        await logger.addEvent(event)
-        let logs = await logger.logs(for: "TestSource")
+        await logger.log(timestamp: timestamp, source: source, variant: .info, message: message)
+        let logs = await logger.logs(for: source)
         
         #expect(logs.count == 1)
         
         #expect(logs.first?.timestamp == timestamp)
-        #expect(logs.first?.source == "TestSource")
-        #expect(logs.first?.message == "Test message")
+        #expect(logs.first?.source == source)
+        #expect(logs.first?.message == message)
         #expect(logs.first?.variant == .info)
         #expect(logs.first?.data == nil)
     }
@@ -37,6 +32,9 @@ struct LoggerTests {
     @Test
     func testLogWithEncodableData() async throws {
         let logger = Logger()
+        let source = "TestSource"
+        let message = "With Data Message"
+        
         struct TestData: Codable, Equatable { let value: Int }
         let data = TestData(value: 42)
         
@@ -44,11 +42,11 @@ struct LoggerTests {
             timestamp: Date(),
             source: "TestSource",
             variant: .warning,
-            message: "With data",
+            message: message,
             data: data
         )
         
-        let logs = await logger.logs(for: "TestSource")
+        let logs = await logger.logs(for: source)
         #expect(logs.count == 1)
         
         let logData = logs.first!.data!
@@ -60,44 +58,27 @@ struct LoggerTests {
     @Test
     func testPruneLogsIfNeeded() async {
         let logger = Logger()
+        let source = "PruneSource"
         
         let maxCount = 1000
         for i in 0..<(maxCount + 10) {
-            let event = LogEvent(
-                timestamp: Date(),
-                source: "PruneSource",
-                variant: .info,
-                message: "Event \(i)",
-                data: nil
-            )
-            await logger.addEvent(event)
+            let message = "Event \(i)"
+            await logger.log(timestamp: .init(), source: source, variant: .info, message: message)
         }
-        let logs = await logger.logs(for: "PruneSource")
+        
+        let logs = await logger.logs(for: source)
         #expect(logs.count == maxCount)
     }
 
     @Test
     func testLogsFilteringByVariant() async {
         let logger = Logger()
+        let source = "FilterSource"
         
-        let infoEvent = LogEvent(
-            timestamp: Date(),
-            source: "FilterSource",
-            variant: .info,
-            message: "Info",
-            data: nil
-        )
-        
-        let errorEvent = LogEvent(
-            timestamp: Date(),
-            source: "FilterSource",
-            variant: .critical,
-            message: "Error",
-            data: nil
-        )
-        await logger.addEvent(infoEvent)
-        await logger.addEvent(errorEvent)
-        let errorLogs = await logger.logs(for: "FilterSource", by: .critical)
+        await logger.log(timestamp: .init(), source: source, variant: .info, message: "Info")
+        await logger.log(timestamp: .init(), source: source, variant: .critical, message: "Error")
+
+        let errorLogs = await logger.logs(for: source, by: .critical)
         
         #expect(errorLogs.count == 1)
         #expect(errorLogs.first?.variant == .critical)

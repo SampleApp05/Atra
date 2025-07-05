@@ -27,7 +27,7 @@ enum RESTError: LocalizedError {
     }
 }
 
-final class RESTClient {
+final class RESTClient: Loggable {
     private static let successStatusRange: Set<Int> = Set(200...299)
     
     private let connector: NetworkConnector
@@ -88,14 +88,17 @@ final class RESTClient {
         do {
             (data, response) = try await connector.execute(request: request)
         } catch {
+            log(variant: .requestFailure, message: "Network request failed for URL: \(request.url?.absoluteString ?? "Unknown URL") with error: \(error.localizedDescription)")
             throw NetworkError.requestFailed(error)
         }
         
         guard let httpResponse = response as? HTTPURLResponse else {
+            log(variant: .requestFailure, message: "Invalid response type for URL: \(request.url?.absoluteString ?? "Unknown URL")")
             throw NetworkError.invalidResponse
         }
         
         guard Self.successStatusRange.contains(httpResponse.statusCode) else {
+            log(variant: .requestFailure, message: "Request failed with status code \(httpResponse.statusCode) for URL: \(request.url?.absoluteString ?? "Unknown URL")")
             throw NetworkError.statusCode(httpResponse.statusCode)
         }
         
@@ -103,6 +106,7 @@ final class RESTClient {
         do {
             networkResponse = try decodeResponse(data: data)
         } catch {
+            log(variant: .requestFailure, message: "Failed to decode response for URL: \(request.url?.absoluteString ?? "Unknown URL") with error: \(error.localizedDescription)")
             throw NetworkError.decodingFailed(error)
         }
         
@@ -129,6 +133,7 @@ final class RESTClient {
                 do {
                     try await Task.sleep(nanoseconds: delay.inNanoSeconds)
                 } catch {
+                    log(variant: .warning, message: "Task cancelled during retry delay for request: \(request.url?.absoluteString ?? "Unknown URL")")
                     throw NetworkError.taskCancelled
                 }
                 
@@ -136,6 +141,7 @@ final class RESTClient {
             }
         }
         
+        log(variant: .critical, message: "Retry limit reached for request: \(request.url?.absoluteString ?? "Unknown URL") after \(retryAttempts) attempts.")
         throw NetworkError.retryLimitReached
     }
 }
