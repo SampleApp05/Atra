@@ -12,6 +12,8 @@ final class MockWebSocketTask: WebSocketTask {
     var didResume = false
     var sentMessages: [WebSocketMessage] = []
     var receiveResult: Result<WebSocketMessage, Error>?
+    
+    var state: URLSessionTask.State = .running
     var closeCode: URLSessionWebSocketTask.CloseCode = .invalid
     
     func resume() {

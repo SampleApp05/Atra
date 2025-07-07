@@ -14,6 +14,7 @@ final class AppViewModel: BaseAppViewModel, AppVersionEvaluator {
     private(set) var configIsValid: Bool = true
     private(set) var appVersionState: AppVersionState = .upToDate
     private(set) var watchlistApiKey: String = ""
+    private(set) var proxyToken: String = ""
     
     private let configService: ConfigService
     
@@ -33,6 +34,7 @@ final class AppViewModel: BaseAppViewModel, AppVersionEvaluator {
             
             handleAppVersionUpdate()
             handleApiKeyUpdate()
+            handleProxyTokenUpdate()
             
             requestState = .success
         } catch {
@@ -73,6 +75,8 @@ final class AppViewModel: BaseAppViewModel, AppVersionEvaluator {
                 handleAppVersionUpdate()
             case .watchlistAPIKey:
                 handleApiKeyUpdate()
+            case .proxyToken:
+                handleProxyTokenUpdate()
             }
         }
     }
@@ -123,6 +127,20 @@ final class AppViewModel: BaseAppViewModel, AppVersionEvaluator {
             }
             
             watchlistApiKey = apiKey
+        } catch {
+            handleConfigError(error)
+        }
+    }
+    
+    func handleProxyTokenUpdate() {
+        do {
+            let token: String = try configService.fetchValue(for: .proxyToken)
+            
+            guard token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
+                throw ConfigError.invalidAPIKeyValue
+            }
+            
+            proxyToken = token
         } catch {
             handleConfigError(error)
         }

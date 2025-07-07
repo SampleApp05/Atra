@@ -8,6 +8,7 @@
 import Foundation
 
 enum WebSocketError: LocalizedError {
+    case couldNotConnect
     case taskDisconnected
     case socketError(Error)
 }
@@ -15,10 +16,12 @@ enum WebSocketError: LocalizedError {
 actor WebSocketService: WebSocketClient, Loggable {
     struct Config {
         let url: URL
+        let headers: [Header]
         let protocols: [String]
         
-        init(url: URL, protocols: [String] = []) {
+        init(url: URL, headers: [Header] = [], protocols: [String] = []) {
             self.url = url
+            self.headers = headers
             self.protocols = protocols
         }
     }
@@ -45,6 +48,14 @@ actor WebSocketService: WebSocketClient, Loggable {
     }
     
     // MARK: - Private
+    private func buildRequest() -> URLRequest {
+        var request = URLRequest(url: config.url)
+        config.headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+        
+        return request
+    }
+    
+    // MARK: - Public
     func handleSocketMessage(continuation: WebSocketStream.Continuation) async {
         guard let webSocketTask else {
             continuation.finish(throwing: WebSocketError.taskDisconnected)
@@ -57,7 +68,7 @@ actor WebSocketService: WebSocketClient, Loggable {
             do {
                 let message = try await webSocketTask.receive()
                 
-                log(variant: .info, message: "Received message: \(message)")
+                log(variant: .info, message: "Received WebSocket message")
                 continuation.yield(message)
             } catch {
                 continuation.finish(throwing: WebSocketError.socketError(error))
@@ -68,10 +79,15 @@ actor WebSocketService: WebSocketClient, Loggable {
         }
     }
     
-    // MARK: - Public
-    func connect() {
-        webSocketTask = webSocketConnector.webSocketTask(for: config.url, protocols: config.protocols)
+    func connect() throws {
+        let request = buildRequest()
+        
+        webSocketTask = webSocketConnector.webSocketTask(for: request)
         webSocketTask?.resume()
+        
+        guard webSocketTask?.state == .running else {
+            throw WebSocketError.couldNotConnect
+        }
         
         log(variant: .info, message: "WebSocket task started for URL: \(config.url)")
     }

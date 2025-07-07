@@ -22,12 +22,14 @@ struct AppViewModelTests {
     func testFetchRemoteConfigSuccess() async {
         service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
         service.fetchValueResponses[.watchlistAPIKey] = "test-key"
+        service.fetchValueResponses[.proxyToken] = "test-proxy-key"
         
         await viewModel.fetchRemoteConfig()
         
         #expect(viewModel.requestState == .success)
         #expect(viewModel.configIsValid)
         #expect(viewModel.watchlistApiKey == "test-key")
+        #expect(viewModel.proxyToken == "test-proxy-key")
     }
     
     @Test
@@ -50,6 +52,15 @@ struct AppViewModelTests {
     }
     
     @Test
+    func testHandleProxyTokenUpdateInvalidToken() {
+        service.fetchValueResponses[.proxyToken] = ""
+        
+        viewModel.handleProxyTokenUpdate()
+        
+        #expect(viewModel.configIsValid == false)
+    }
+    
+    @Test
     func testHandleConfigUpdateUnsupportedKey() {
         // Should not throw or crash
         viewModel.handleConfigUpdate(for: ["unsupported_key"])
@@ -58,7 +69,9 @@ struct AppViewModelTests {
     
     @Test
     func testShouldHandleAPIKeyUpdate() async throws {
-        service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended) // intial fetch requires valid value
+        // intial fetch requires valid values
+        service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
+        service.fetchValueResponses[.proxyToken] = "test-proxy-key"
         
         let oldKey = "old-test-key"
         let newKey = "new-test-key"
@@ -72,6 +85,27 @@ struct AppViewModelTests {
         viewModel.handleConfigUpdate(for: [AppConfigKey.watchlistAPIKey.rawValue])
         
         #expect(viewModel.watchlistApiKey == newKey)
+        #expect(viewModel.configIsValid == true)
+    }
+    
+    @Test
+    func testShouldHandleProxyTokenUpdate() async throws {
+        // intial fetch requires valid values
+        service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
+        service.fetchValueResponses[.watchlistAPIKey] = "test-key"
+        
+        let oldKey = "old-test-key"
+        let newKey = "new-test-key"
+        service.fetchValueResponses[.proxyToken] = oldKey
+        await viewModel.fetchRemoteConfig()
+        
+        #expect(viewModel.proxyToken == oldKey)
+        
+        service.fetchValueResponses[.proxyToken] = newKey
+        
+        viewModel.handleConfigUpdate(for: [AppConfigKey.proxyToken.rawValue])
+        
+        #expect(viewModel.proxyToken == newKey)
         #expect(viewModel.configIsValid == true)
     }
 }

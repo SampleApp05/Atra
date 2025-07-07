@@ -10,9 +10,19 @@ import FirebaseRemoteConfig
 
 struct ContentView: View {
     @State var coordinator = AppCoordinator()
+    
     let viewModel: AppViewModel
     
     init(configService: ConfigService) {
+//        let webSocketService = WebSocketService(
+//            webSocketConnector: URLSession(
+//                configuration: .default
+//            ),
+//            config: .init(
+//                url: URL(string: "ws://localhost:8080")!
+//            )
+//        )
+        
         viewModel = .init(configService: configService)
     }
     

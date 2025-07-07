@@ -18,4 +18,8 @@ struct MockWebSocketConnector: WebSocketConnector {
     func webSocketTask(for url: URL, protocols: [String]) -> WebSocketTask {
         return task
     }
+    
+    func webSocketTask(for request: URLRequest) -> WebSocketTask {
+        return task
+    }
 }

@@ -13,7 +13,7 @@ protocol WebSocketClient: Actor {
     var stream: WebSocketStream { get }
     var webSocketTask: WebSocketTask? { get }
     
-    func connect()
+    func connect() throws
     func disconnect(with code: URLSessionWebSocketTask.CloseCode)
     func handleSocketMessage(continuation: WebSocketStream.Continuation) async
     func send(_ message: WebSocketMessage) async throws

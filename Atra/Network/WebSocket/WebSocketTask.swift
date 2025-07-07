@@ -9,6 +9,7 @@ import Foundation
 typealias WebSocketMessage = URLSessionWebSocketTask.Message
 
 protocol WebSocketTask {
+    var state: URLSessionTask.State { get }
     var closeCode: URLSessionWebSocketTask.CloseCode { get }
     
     func resume()

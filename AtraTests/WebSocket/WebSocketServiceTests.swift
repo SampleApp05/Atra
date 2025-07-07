@@ -40,7 +40,7 @@ struct WebSocketServiceTests {
         let expectedMessage = "Hello Socket"
         connector.task.receiveResult = .success(.string(expectedMessage))
         
-        await service.connect()
+        try await service.connect()
         
         for try await message in await service.stream {
             print("Message: \(message)")
@@ -58,7 +58,7 @@ struct WebSocketServiceTests {
         let error = URLError(.unknown)
         connector.task.receiveResult = .failure(error)
         
-        await service.connect()
+        try await service.connect()
         
         await #expect {
             for try await message in await service.stream {
@@ -77,20 +77,20 @@ struct WebSocketServiceTests {
         #expect(connector.task.closeCode.rawValue == URLSessionWebSocketTask.CloseCode.internalServerError.rawValue)
     }
     
-    @Test func testConnectResumesTask() async {
-        await service.connect()
+    @Test func testConnectResumesTask() async throws {
+        try await service.connect()
         #expect(connector.task.didResume == true)
     }
     
-    @Test func testDisconnectCancelsTask() async {
-        await service.connect()
+    @Test func testDisconnectCancelsTask() async throws {
+        try await service.connect()
         await service.disconnect()
         
         #expect(connector.task.closeCode == .normalClosure)
     }
     
     @Test func testSendStringMessage() async throws {
-        await service.connect()
+        try await service.connect()
         
         let messageValue = "Hello socket"
         
@@ -112,7 +112,7 @@ struct WebSocketServiceTests {
     }
     
     @Test func testSendDataMessage() async throws {
-        await service.connect()
+        try await service.connect()
         
         let messageValue = "Hello socket"
         let data = Data(messageValue.utf8)

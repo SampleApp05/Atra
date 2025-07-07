@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-extension Notification.Name {
-    static let versionUpdated = Notification.Name("versionUpdated")
-    static let watchlistAPIKeyUpdated = Notification.Name("watchlistAPIKeyUpdated")
-}
-
 class AppDelegate: NSObject, UIApplicationDelegate {
     let configService: ConfigService = FirebaseConfigService()
     
@@ -23,4 +18,3 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 }
-

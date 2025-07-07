@@ -13,6 +13,7 @@ protocol BaseAppViewModel: Observable {
     var configIsValid: Bool { get }
     var appVersionState: AppVersionState { get }
     var watchlistApiKey: String { get }
+    var proxyToken: String { get }
     
     func fetchRemoteConfig() async
     func userDidTapRetryButton() async
@@ -24,4 +25,5 @@ protocol BaseAppViewModel: Observable {
     
     func handleAppVersionUpdate()
     func handleApiKeyUpdate()
+    func handleProxyTokenUpdate()
 }
