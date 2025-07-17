@@ -6,37 +6,56 @@
 //
 
 import SwiftUI
-import FirebaseRemoteConfig
 
 struct ContentView: View {
-    @State var coordinator = AppCoordinator()
-    
-    let viewModel: AppViewModel
+    @State private var viewModel: BaseAppViewModel & SplashViewModel
     
     init(configService: ConfigService) {
-//        let webSocketService = WebSocketService(
-//            webSocketConnector: URLSession(
-//                configuration: .default
-//            ),
-//            config: .init(
-//                url: URL(string: "ws://localhost:8080")!
-//            )
-//        )
-        
-        viewModel = .init(configService: configService)
+        viewModel = AppViewModel(
+            configService: configService,
+            socketClient: WebSocketService(webSocketConnector: URLSession(configuration: .default))
+        )
+    }
+    
+    private var splashView: some View {
+        SplashView(viewModel: viewModel)
+            .task {
+                await viewModel.setupAppState()
+            }
+    }
+    
+    private var contentView: some View {
+        VStack {
+            let coordinator = AppCoordinator(config: viewModel.appConfig)
+            coordinator.containerView
+            Button {
+                print("Retry tapped")
+            } label: {
+                Text("Button")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .disabled(viewModel.shouldDisableUI)
+        .toast(
+            isPresented: $viewModel.shouldShowVersionUpdateNotification,
+            config: viewModel.versionNotificationConfig(),
+            duration: viewModel.notificationDuration,
+            isDismissable: viewModel.shouldDisableUI == false,
+            action: viewModel.redirectToAppStore
+        )
     }
     
     var body: some View {
-        coordinator.containerView
-            .task {
-                await viewModel.fetchRemoteConfig()
-                viewModel.startConfigUpdateListener()
-            }
+        if viewModel.requestState != .success {
+            splashView
+        } else {
+            contentView
+        }
     }
 }
 
 #Preview {
     ContentView(
-        configService: FirebaseConfigService(with: "ContentView") { RemoteConfig.remoteConfig() }
+        configService: FirebaseConfigService(with: "ContentView"),
     )
 }

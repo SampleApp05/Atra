@@ -5,16 +5,23 @@
 //  Created by Daniel Velikov on 1.07.25.
 //
 
-import Foundation
+import SwiftUI
+import AsyncAlgorithms
 
-typealias WebSocketStream = AsyncThrowingStream<WebSocketMessage, Error>
+typealias WebSocketChannel = AsyncChannel<WebSocketMessage>
 
 protocol WebSocketClient: Actor {
-    var stream: WebSocketStream { get }
     var webSocketTask: WebSocketTask? { get }
+    var channel: WebSocketChannel { get }
     
-    func connect() throws
+    var isConnected: Bool { get }
+    
+    func connect(with config: WebSocketConfig) throws
     func disconnect(with code: URLSessionWebSocketTask.CloseCode)
-    func handleSocketMessage(continuation: WebSocketStream.Continuation) async
+    
+    func startReceiving()
+    func stopReceivingIfNeeded()
+    
+    func handleSocketMessage() async
     func send(_ message: WebSocketMessage) async throws
 }

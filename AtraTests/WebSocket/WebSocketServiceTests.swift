@@ -14,10 +14,11 @@ import Foundation
 struct WebSocketServiceTests {
     let connector: MockWebSocketConnector
     let service: WebSocketService
+    let webSocketConfig: WebSocketConfig = .init(urlPath: "wss://test", headers: [:], protocols: [])
     
     init() {
         self.connector = .init()
-        self.service = WebSocketService(webSocketConnector: connector, config: .init(url: URL(string: "wss://test")!))
+        self.service = WebSocketService(webSocketConnector: connector)
     }
     
     @Test func testTaskDisconnectedError() async throws {
@@ -40,7 +41,7 @@ struct WebSocketServiceTests {
         let expectedMessage = "Hello Socket"
         connector.task.receiveResult = .success(.string(expectedMessage))
         
-        try await service.connect()
+        try await service.connect(with: webSocketConfig)
         
         for try await message in await service.stream {
             print("Message: \(message)")
@@ -58,7 +59,7 @@ struct WebSocketServiceTests {
         let error = URLError(.unknown)
         connector.task.receiveResult = .failure(error)
         
-        try await service.connect()
+        try await service.connect(with: webSocketConfig)
         
         await #expect {
             for try await message in await service.stream {
@@ -78,19 +79,19 @@ struct WebSocketServiceTests {
     }
     
     @Test func testConnectResumesTask() async throws {
-        try await service.connect()
+        try await service.connect(with: webSocketConfig)
         #expect(connector.task.didResume == true)
     }
     
     @Test func testDisconnectCancelsTask() async throws {
-        try await service.connect()
+        try await service.connect(with: webSocketConfig)
         await service.disconnect()
         
         #expect(connector.task.closeCode == .normalClosure)
     }
     
     @Test func testSendStringMessage() async throws {
-        try await service.connect()
+        try await service.connect(with: webSocketConfig)
         
         let messageValue = "Hello socket"
         
@@ -112,7 +113,7 @@ struct WebSocketServiceTests {
     }
     
     @Test func testSendDataMessage() async throws {
-        try await service.connect()
+        try await service.connect(with: webSocketConfig)
         
         let messageValue = "Hello socket"
         let data = Data(messageValue.utf8)
@@ -134,12 +135,41 @@ struct WebSocketServiceTests {
         #expect(containsMessage == true)
     }
     
-    @Test func sendSendWhileDisconnected() async throws {
+    @Test func sendFailWhileDisconnected() async throws {
         await #expect {
             try await service.send(.string("Hello"))
         } throws: { (error) in
             guard let error = error as? WebSocketError,
                   case .taskDisconnected = error else {
+                return false
+            }
+            return true
+        }
+    }
+    
+    @Test func reconnectSuccess() async throws {
+        try await service.connect(with: webSocketConfig)
+        #expect(connector.task.didResume == true)
+        
+        let newConfig = WebSocketConfig(urlPath: "wss://new-test", headers: [:], protocols: [])
+        await service.disconnect()
+        
+        try await service.connect(with: newConfig)
+        #expect(connector.task.didResume == true)
+    }
+    
+    @Test func reconnectFailure() async throws {
+        try await service.connect(with: webSocketConfig)
+        #expect(connector.task.didResume == true)
+        
+        let newConfig = WebSocketConfig(urlPath: " ", headers: [:], protocols: [])
+        await service.disconnect()
+        
+        await #expect {
+            try await service.connect(with: newConfig)
+        } throws: { (error) in
+            guard let error = error as? WebSocketError,
+                  case .invalidURL = error else {
                 return false
             }
             return true

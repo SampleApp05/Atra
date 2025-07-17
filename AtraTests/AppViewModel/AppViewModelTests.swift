@@ -10,31 +10,37 @@ import Testing
 @testable import Atra
 
 struct AppViewModelTests {
-    let service: MockConfigService
+    let configService: MockConfigService
+    let webSocketClient: WebSocketClient
     let viewModel: AppViewModel
     
     init() {
-        service = MockConfigService()
-        viewModel = AppViewModel(configService: service)
+        configService = MockConfigService()
+        webSocketClient = WebSocketService(webSocketConnector: MockWebSocketConnector())
+        viewModel = AppViewModel(configService: configService, socketClient: webSocketClient)
     }
     
     @Test
     func testFetchRemoteConfigSuccess() async {
-        service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
-        service.fetchValueResponses[.watchlistAPIKey] = "test-key"
-        service.fetchValueResponses[.proxyToken] = "test-proxy-key"
+        let webSocketConfig = WebSocketConfig(
+            urlPath: "wss://example.com/socket",
+            headers: ["Auth": "Token"],
+            protocols: []
+        )
+        
+        configService.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
+        configService.fetchValueResponses[.webSocketConfig] = webSocketConfig
         
         await viewModel.fetchRemoteConfig()
         
         #expect(viewModel.requestState == .success)
         #expect(viewModel.configIsValid)
-        #expect(viewModel.watchlistApiKey == "test-key")
-        #expect(viewModel.proxyToken == "test-proxy-key")
+        #expect(viewModel.appConfig.webSocketConfig == webSocketConfig)
     }
     
     @Test
     func testFetchRemoteConfigFailure() async {
-        service.fetchShouldThrow = true
+        configService.fetchShouldThrow = true
         
         await viewModel.fetchRemoteConfig()
         
@@ -43,19 +49,10 @@ struct AppViewModelTests {
     }
     
     @Test
-    func testHandleApiKeyUpdateInvalidKey() {
-        service.fetchValueResponses[.watchlistAPIKey] = ""
+    func testHandleInvalidWebSocketConfig() {
+        configService.fetchValueResponses[.webSocketConfig] = WebSocketConfig(urlPath: "")
         
-        viewModel.handleApiKeyUpdate()
-        
-        #expect(viewModel.configIsValid == false)
-    }
-    
-    @Test
-    func testHandleProxyTokenUpdateInvalidToken() {
-        service.fetchValueResponses[.proxyToken] = ""
-        
-        viewModel.handleProxyTokenUpdate()
+        viewModel.handleWebSocketConfigUpdate()
         
         #expect(viewModel.configIsValid == false)
     }
@@ -68,44 +65,23 @@ struct AppViewModelTests {
     }
     
     @Test
-    func testShouldHandleAPIKeyUpdate() async throws {
-        // intial fetch requires valid values
-        service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
-        service.fetchValueResponses[.proxyToken] = "test-proxy-key"
+    func testShouldHandleWeb() async throws {
+        let oldConfig = WebSocketConfig(urlPath: "old")
+        let newConfig = WebSocketConfig(urlPath: "new")
         
-        let oldKey = "old-test-key"
-        let newKey = "new-test-key"
-        service.fetchValueResponses[.watchlistAPIKey] = oldKey
+        configService.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
+        configService.fetchValueResponses[.webSocketConfig] = oldConfig
+        
         await viewModel.fetchRemoteConfig()
         
-        #expect(viewModel.watchlistApiKey == oldKey)
-        
-        service.fetchValueResponses[.watchlistAPIKey] = newKey
-        
-        viewModel.handleConfigUpdate(for: [AppConfigKey.watchlistAPIKey.rawValue])
-        
-        #expect(viewModel.watchlistApiKey == newKey)
+        #expect(viewModel.appConfig.webSocketConfig == oldConfig)
         #expect(viewModel.configIsValid == true)
-    }
-    
-    @Test
-    func testShouldHandleProxyTokenUpdate() async throws {
-        // intial fetch requires valid values
-        service.fetchValueResponses[.version] = AppVersion(version: "1.0.0", variant: .recommended)
-        service.fetchValueResponses[.watchlistAPIKey] = "test-key"
         
-        let oldKey = "old-test-key"
-        let newKey = "new-test-key"
-        service.fetchValueResponses[.proxyToken] = oldKey
-        await viewModel.fetchRemoteConfig()
+        configService.fetchValueResponses[.webSocketConfig] = newConfig
         
-        #expect(viewModel.proxyToken == oldKey)
+        viewModel.handleConfigUpdate(for: [AppConfigKey.webSocketConfig.rawValue])
         
-        service.fetchValueResponses[.proxyToken] = newKey
-        
-        viewModel.handleConfigUpdate(for: [AppConfigKey.proxyToken.rawValue])
-        
-        #expect(viewModel.proxyToken == newKey)
+        #expect(viewModel.appConfig.webSocketConfig == newConfig)
         #expect(viewModel.configIsValid == true)
     }
 }

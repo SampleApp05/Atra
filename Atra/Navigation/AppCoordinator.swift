@@ -11,12 +11,19 @@ enum AppFlow: CaseIterable {
     case watchilists
     case staking
 }
+
+@Observable
+final class AppCoordinator: TabViewContentProvider {
+    private let config: AppConfig
     
-final class AppCoordinator: Observable, TabViewContentProvider {
     private(set) var tabs = AppFlow.allCases
     var selectedFlow: AppFlow = .watchilists
     
     var containerView: some View { TabViewContainerView(provider: self) }
+    
+    init(config: AppConfig) {
+        self.config = config
+    }
     
     func start(with initial: AppFlow = .watchilists, tabs: [AppFlow]? = nil) {
         defer {

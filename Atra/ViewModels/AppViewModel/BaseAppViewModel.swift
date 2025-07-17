@@ -5,15 +5,23 @@
 //  Created by Daniel Velikov on 4.07.25.
 //
 
-import Foundation
+import SwiftUI
 
 protocol BaseAppViewModel: Observable {
     var requestState: RequestState { get }
     
     var configIsValid: Bool { get }
-    var appVersionState: AppVersionState { get }
-    var watchlistApiKey: String { get }
-    var proxyToken: String { get }
+    var appConfig: AppConfig { get }
+    
+    var shouldShowVersionUpdateNotification: Bool { get set }
+    var shouldDisableUI: Bool { get }
+    var notificationDuration: TimeInterval { get }
+    
+    func setupAppState() async
+    
+    func establishSocketConnection() async
+    func startWebSocketListener() async
+    func handleSocketMessage(_ message: WebSocketMessage) throws
     
     func fetchRemoteConfig() async
     func userDidTapRetryButton() async
@@ -24,6 +32,8 @@ protocol BaseAppViewModel: Observable {
     func handleUpdateError(_ error: Error)
     
     func handleAppVersionUpdate()
-    func handleApiKeyUpdate()
-    func handleProxyTokenUpdate()
+    func handleWebSocketConfigUpdate()
+    
+    func versionNotificationConfig() -> ToastView.Config
+    func redirectToAppStore()
 }

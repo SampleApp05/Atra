@@ -9,6 +9,5 @@ import Foundation
 
 enum AppConfigKey: String {
     case version
-    case watchlistAPIKey = "watchlist_api_key"
-    case proxyToken = "proxy_token"
+    case webSocketConfig = "websocket_config"
 }

@@ -9,6 +9,7 @@ import Foundation
 
 extension AppViewModel {
     enum ConfigError: LocalizedError {
-        case invalidAPIKeyValue
+        case invalidAppVersion
+        case invalidWebSocketConfig
     }
 }
