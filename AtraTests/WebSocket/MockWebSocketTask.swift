@@ -10,6 +10,7 @@ import Foundation
 
 final class MockWebSocketTask: WebSocketTask {
     var didResume = false
+    var didCancel = false
     var sentMessages: [WebSocketMessage] = []
     var receiveResult: Result<WebSocketMessage, Error>?
     
@@ -22,6 +23,8 @@ final class MockWebSocketTask: WebSocketTask {
     
     func cancel(with closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         self.closeCode = closeCode
+        didCancel = true
+        state = .canceling
     }
     
     func send(_ message: WebSocketMessage) async throws {

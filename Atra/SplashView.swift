@@ -68,10 +68,11 @@ struct SplashView: View {
 }
 
 #Preview {
+    let client = WebSocketService(connector: URLSession.shared)
     SplashView(
         viewModel: AppViewModel(
             configService: FirebaseConfigService(with: "SplashView"),
-            socketClient: WebSocketService(webSocketConnector: URLSession.shared)
+            socketConsumer: CoinDataConsumer(client: client, dataStorage: CoinDataStorage())
         )
     )
 }

@@ -15,7 +15,7 @@ extension View {
     func toast(
         isPresented: Binding<Bool>,
         config: ToastView.Config,
-        duration: TimeInterval,
+        duration: TimeInterval = GlobalConstants.notificationDuration,
         position: ToastModifier.Position = .top,
         isDismissable: Bool = true,
         action: VoidClosure? = nil

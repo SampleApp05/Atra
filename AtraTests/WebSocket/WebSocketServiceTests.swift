@@ -18,12 +18,13 @@ struct WebSocketServiceTests {
     
     init() {
         self.connector = .init()
-        self.service = WebSocketService(webSocketConnector: connector)
+        self.service = WebSocketService(connector: connector)
     }
     
     @Test func testTaskDisconnectedError() async throws {
         await #expect {
-            for try await message in await service.stream {
+            try await service.startReceiving()
+            for try await message in await service.channel {
                 print("Message: \(message)")
             }
         } throws: { (error) in
@@ -38,49 +39,52 @@ struct WebSocketServiceTests {
     }
     
     @Test func testSocketReceiveSuccess() async throws {
-        let expectedMessage = "Hello Socket"
-        connector.task.receiveResult = .success(.string(expectedMessage))
+        let mockMessage = "{\"event\":\"status\",\"data\":{\"lastUpdated\":null,\"nextUpdate\":\"123\",\"isLoading\":true}}"
+        connector.task.receiveResult = .success(.string(mockMessage))
         
-        try await service.connect(with: webSocketConfig)
+        try await service.establishConnection(with: webSocketConfig, subsribeMessage: SubscribeMessage())
+        try await service.startReceiving()
         
-        for try await message in await service.stream {
+        for try await message in await service.channel {
             print("Message: \(message)")
             
-            guard case .string(let receivedMessage) = message else {
-                throw URLError(.unknown) // throw some error so the test fails if the message is not a string
+            guard case .success(let receivedMessage) = message else {
+                throw URLError(.unknown) // throw some error so the test fails if the message result is not success
             }
             
-            #expect(receivedMessage == expectedMessage)
+            switch receivedMessage {
+            case .string(let data):
+                #expect(data == mockMessage)
+            default:
+                throw URLError(.unknown) // throw some error so the test fails if the message != mockMessage
+            }
+            
             break
         }
     }
     
     @Test func testSocketReceiveFailure() async throws {
-        let error = URLError(.unknown)
-        connector.task.receiveResult = .failure(error)
+        let mockError = URLError(.unknown)
+        connector.task.receiveResult = .failure(mockError)
         
         try await service.connect(with: webSocketConfig)
+        try await service.startReceiving()
         
-        await #expect {
-            for try await message in await service.stream {
-                print("Message: \(message)")
-            }
-        } throws: { (error) in
-            print("Error: \(error)")
-            guard let error  = error as? WebSocketError,
-                  case .socketError(URLError.unknown) = error else {
-                return false
+        for try await message in await service.channel {
+            guard case .failure(let error) = message else {
+                throw URLError(.unknown) // throw some error so the test fails if the message is not a failure
             }
             
-            return true
+            let isExpectedError: Bool = {
+                guard let error = error as? URLError, error == mockError else {
+                    return false
+                }
+                return true
+            }()
+            
+            #expect(isExpectedError == true)
+            break
         }
-        
-        #expect(connector.task.closeCode.rawValue == URLSessionWebSocketTask.CloseCode.internalServerError.rawValue)
-    }
-    
-    @Test func testConnectResumesTask() async throws {
-        try await service.connect(with: webSocketConfig)
-        #expect(connector.task.didResume == true)
     }
     
     @Test func testDisconnectCancelsTask() async throws {

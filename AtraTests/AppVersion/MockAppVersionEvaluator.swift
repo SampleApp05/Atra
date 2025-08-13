@@ -8,7 +8,7 @@
 import Foundation
 @testable import Atra
 
-struct MockAppVersionEvaluator: AppVersionEvaluator {
+struct MockAppVersionEvaluator: VersionEvaluator {
     var bundleVersion: String = ""
     
     func fetchBundleVersion() -> String {

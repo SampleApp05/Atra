@@ -8,20 +8,20 @@
 import SwiftUI
 
 protocol BaseAppViewModel: Observable {
+    associatedtype T: SocketDataConsumer where T.Response == SocketResponse, T.Storage.Element == Coin, T.Storage.SubsetID == WatchlistUpdateVariant
+    
+    var configService: ConfigService { get }
+    var appVersionEvaluator: VersionEvaluator { get }
+    var socketConsumer: T { get }
+    var configUpdateListenerTask: VoidTask? { get }
+    
     var requestState: RequestState { get }
     
     var configIsValid: Bool { get }
     var appConfig: AppConfig { get }
     
     var shouldShowVersionUpdateNotification: Bool { get set }
-    var shouldDisableUI: Bool { get }
-    var notificationDuration: TimeInterval { get }
-    
-    func setupAppState() async
-    
-    func establishSocketConnection() async
-    func startWebSocketListener() async
-    func handleSocketMessage(_ message: WebSocketMessage) throws
+    var shouldForceUpdate: Bool { get }
     
     func fetchRemoteConfig() async
     func userDidTapRetryButton() async

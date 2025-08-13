@@ -8,19 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel: BaseAppViewModel & SplashViewModel
+    @State private var viewModel: any BaseAppViewModel & SplashViewModel
     
     init(configService: ConfigService) {
+        let client = WebSocketService(connector: URLSession(configuration: .default))
+        let storage = CoinDataStorage()
+        
         viewModel = AppViewModel(
             configService: configService,
-            socketClient: WebSocketService(webSocketConnector: URLSession(configuration: .default))
+            socketConsumer: CoinDataConsumer(client: client, dataStorage: storage)
         )
     }
     
     private var splashView: some View {
         SplashView(viewModel: viewModel)
             .task {
-                await viewModel.setupAppState()
+                await viewModel.fetchRemoteConfig()
             }
     }
     
@@ -28,19 +31,12 @@ struct ContentView: View {
         VStack {
             let coordinator = AppCoordinator(config: viewModel.appConfig)
             coordinator.containerView
-            Button {
-                print("Retry tapped")
-            } label: {
-                Text("Button")
-            }
-            .buttonStyle(.borderedProminent)
         }
-        .disabled(viewModel.shouldDisableUI)
+        .disabled(viewModel.shouldForceUpdate)
         .toast(
             isPresented: $viewModel.shouldShowVersionUpdateNotification,
             config: viewModel.versionNotificationConfig(),
-            duration: viewModel.notificationDuration,
-            isDismissable: viewModel.shouldDisableUI == false,
+            isDismissable: viewModel.shouldForceUpdate == false,
             action: viewModel.redirectToAppStore
         )
     }
