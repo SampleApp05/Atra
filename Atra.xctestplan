@@ -1,0 +1,47 @@
+{
+  "configurations" : [
+    {
+      "id" : "EA354CAE-8ACB-4013-9815-7428184619CF",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:Atra.xcodeproj",
+          "identifier" : "8BC6E0C32E03EEC100173F9B",
+          "name" : "Atra"
+        }
+      ]
+    },
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Atra.xcodeproj",
+      "identifier" : "8BC6E0C32E03EEC100173F9B",
+      "name" : "Atra"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Atra.xcodeproj",
+        "identifier" : "8BC6E0D32E03EEC300173F9B",
+        "name" : "AtraTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Atra.xcodeproj",
+        "identifier" : "8BC6E0DD2E03EEC300173F9B",
+        "name" : "AtraUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -33,7 +33,7 @@ struct CoinDataStorageTests {
         )
     ]
     
-    let sut = CoinDataStorage()
+    let sut = CoinCacheService()
     
     @Test
     func shouldUpdateCache() {
@@ -42,14 +42,5 @@ struct CoinDataStorageTests {
         #expect(sut.cache.count == mockCoinArray.count)
         #expect(sut.fetchData(for: mockCoinArray[0].id) == mockCoinArray[0])
         #expect(sut.fetchData(for: mockCoinArray[1].id) == mockCoinArray[1])
-    }
-    
-    @Test
-    func shouldUpdateSubsets() {
-        let mockWatchlistIds: [String] = ["bitcoin", "ethereum"]
-        sut.updateSubset(with: .marketcap, data: mockWatchlistIds)
-        
-        #expect(sut.allSubsets.count == 1)
-        #expect(sut.subsets[.marketcap] == mockWatchlistIds)
     }
 }

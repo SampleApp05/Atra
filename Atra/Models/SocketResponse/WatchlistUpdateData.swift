@@ -8,6 +8,8 @@
 import Foundation
 
 struct WatchlistUpdateData: Codable {
+    let id: UUID
+    let name: String
     let variant: WatchlistUpdateVariant
     let lastUpdated: String?
     let nextUpdate: String

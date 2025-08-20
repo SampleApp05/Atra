@@ -8,11 +8,9 @@
 import SwiftUI
 
 protocol BaseAppViewModel: Observable {
-    associatedtype T: SocketDataConsumer where T.Response == SocketResponse, T.Storage.Element == Coin, T.Storage.SubsetID == WatchlistUpdateVariant
-    
     var configService: ConfigService { get }
     var appVersionEvaluator: VersionEvaluator { get }
-    var socketConsumer: T { get }
+    var socketConsumer: CoinSocketDataConsumer { get }
     var configUpdateListenerTask: VoidTask? { get }
     
     var requestState: RequestState { get }

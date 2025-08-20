@@ -19,6 +19,7 @@ final class MockWebSocketTask: WebSocketTask {
     
     func resume() {
         didResume = true
+        state = .running
     }
     
     func cancel(with closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {

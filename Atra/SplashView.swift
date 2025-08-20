@@ -72,7 +72,11 @@ struct SplashView: View {
     SplashView(
         viewModel: AppViewModel(
             configService: FirebaseConfigService(with: "SplashView"),
-            socketConsumer: CoinDataConsumer(client: client, dataStorage: CoinDataStorage())
+            socketConsumer: CoinDataConsumer(
+                client: client,
+                cacheProvider: CoinCacheService(),
+                watchlistProvider: WatchlistProviderService()
+            )
         )
     )
 }

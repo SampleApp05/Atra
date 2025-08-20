@@ -32,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B229E272E54D27E00A79060 /* Atra.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Atra.xctestplan; sourceTree = "<group>"; };
 		8B5530952E09A43F00E64B9D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8BC6E0C42E03EEC100173F9B /* Atra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Atra.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BC6E0D42E03EEC300173F9B /* AtraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AtraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -111,6 +112,7 @@
 		8BC6E0BB2E03EEC100173F9B = {
 			isa = PBXGroup;
 			children = (
+				8B229E272E54D27E00A79060 /* Atra.xctestplan */,
 				8BC6E0C62E03EEC100173F9B /* Atra */,
 				8BC6E0D72E03EEC300173F9B /* AtraTests */,
 				8BC6E0E12E03EEC300173F9B /* AtraUITests */,

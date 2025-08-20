@@ -11,18 +11,18 @@ import Testing
 
 struct CoinDataConsumerTests {
     let connector: MockWebSocketConnector
-    let client: WebSocketClient
-    let storage: CoinDataStorage
-    let sut: CoinDataConsumer<CoinDataStorage>
+    let sut: CoinDataConsumer
     
     let config = WebSocketConfig(urlPath: "ws://example.com/socket")
     let subscribeMessage: any SocketSubsribeMessage = SubscribeMessage()
     
     init() {
         connector = MockWebSocketConnector()
-        client = WebSocketService(connector: connector)
-        storage = .init()
-        sut = CoinDataConsumer(client: client, dataStorage: storage)
+        sut = CoinDataConsumer(
+            client: WebSocketService(connector: connector),
+            cacheProvider: CoinCacheService(),
+            watchlistProvider: WatchlistProviderService()
+        )
     }
     
     @Test
@@ -31,7 +31,7 @@ struct CoinDataConsumerTests {
         
         #expect(connector.task.sentMessages.count == 1)
         #expect(connector.task.didResume == true)
-        #expect(await client.isConnected == true)
+        #expect(await sut.client.isConnected == true)
         #expect(sut.messageTask != nil)
     }
     
@@ -43,7 +43,7 @@ struct CoinDataConsumerTests {
         #expect(connector.task.didCancel == true)
         #expect(connector.task.sentMessages.count == 1) // Initial subscribe message
         #expect(connector.task.closeCode == .abnormalClosure)
-        #expect(await client.isConnected == false)
+        #expect(await sut.client.isConnected == false)
         #expect(sut.messageTask == nil)
     }
     
@@ -105,10 +105,11 @@ struct CoinDataConsumerTests {
 }
 """
         sut.handleSocketMessage(.success(.string(mockMessage)))
-        let btcData = storage.fetchData(for: "bitcoin")
-        let ethData = storage.fetchData(for: "ethereum")
+        let cache = sut.cacheProvider
+        let btcData = cache.fetchData(for: "bitcoin")
+        let ethData = cache.fetchData(for: "ethereum")
         
-        #expect(storage.cache.count == 2)
+        #expect(cache.cache.count == 2)
         #expect(btcData != nil)
         #expect(ethData != nil)
         #expect(btcData?.id == "bitcoin")
@@ -117,10 +118,13 @@ struct CoinDataConsumerTests {
     
     @Test
     func testWatchlistUpdateEvent() async throws {
+        let mockId = UUID()
         let mockMessage = """
 {
   "event": "watchlist_update",
   "data": {
+    "id": "\(mockId)",
+    "name": "Top Marketcap",
     "variant": "top_marketcap",
     "lastUpdated": "2025-08-12T14:00:00Z",
     "nextUpdate": "2025-08-12T18:00:00Z",
@@ -134,13 +138,20 @@ struct CoinDataConsumerTests {
 """
         
         sut.handleSocketMessage(.success(.string(mockMessage)))
-        let watchlistIds = storage.subsets[.marketcap]
+        let watchlistService = sut.watchlistProvider
         
-        #expect(storage.allSubsets.count == 1)
-        #expect(watchlistIds != nil)
-        #expect(watchlistIds?.count == 3)
-        #expect(watchlistIds?[0] == "bitcoin")
-        #expect(watchlistIds?[1] == "ethereum")
-        #expect(watchlistIds?[2] == "ripple")
+        let watchlistIds = watchlistService.watchlistIds
+        let watchlist = watchlistService.fetchWatchlist(with: mockId)
+        
+        #expect(watchlistIds.count == 1)
+        #expect(watchlist != nil)
+        #expect(watchlist?.origin == .remote)
+        #expect(watchlist?.name == "Top Marketcap")
+        #expect(watchlistService.watchlistIds.count == 1)
+        
+        #expect(watchlist?.coins.count == 3)
+        #expect(watchlist?.coins[0] == "bitcoin")
+        #expect(watchlist?.coins[1] == "ethereum")
+        #expect(watchlist?.coins[2] == "ripple")
     }
 }

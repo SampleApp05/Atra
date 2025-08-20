@@ -8,14 +8,16 @@
 import Foundation
 
 @Observable
-final class CoinDataConsumer<T: SocketDataStorage>: SocketDataConsumer where T.Element == Coin, T.SubsetID == WatchlistUpdateVariant {
+final class CoinDataConsumer: CoinSocketDataConsumer {
     let client: WebSocketClient
     private(set) var messageTask: VoidTask? = nil
-    private(set) var dataStorage: T
+    let cacheProvider: CoinCacheProvider
+    let watchlistProvider: WatchlistProvider
     
-    init(client: WebSocketClient, dataStorage: T) {
+    init(client: WebSocketClient, cacheProvider: CoinCacheProvider, watchlistProvider: WatchlistProvider) {
         self.client = client
-        self.dataStorage = dataStorage
+        self.cacheProvider = cacheProvider
+        self.watchlistProvider = watchlistProvider
     }
     
     func connect(with config: WebSocketConfig, subscribeMessage: SocketSubsribeMessage) async{
@@ -49,9 +51,10 @@ final class CoinDataConsumer<T: SocketDataStorage>: SocketDataConsumer where T.E
         case .status(let data):
             print("Received status: \(data)")
         case .cacheUpdate(let data):
-            dataStorage.updateCache(with: data.data)
+            cacheProvider.updateCache(with: data.data)
         case .watchlistUpdate(let data):
-            dataStorage.updateSubset(with: data.variant, data: data.data)
+            let watchlist = Watchlist(id: data.id, name: data.name, origin: .remote, coins: data.data)
+            watchlistProvider.updateRemoteWatchlist(watchlist)
         case .error(let error):
             print("Received error: \(error)")
         }

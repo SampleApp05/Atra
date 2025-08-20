@@ -12,7 +12,7 @@ import AsyncAlgorithms
 final class AppViewModel: BaseAppViewModel {
     let configService: ConfigService
     let appVersionEvaluator: VersionEvaluator = AppVersionEvaluator()
-    let socketConsumer: CoinDataConsumer<CoinDataStorage>
+    let socketConsumer: CoinSocketDataConsumer
     private(set) var configUpdateListenerTask: VoidTask?
     
     // MARK: - Properties
@@ -25,7 +25,7 @@ final class AppViewModel: BaseAppViewModel {
     var shouldForceUpdate: Bool { appConfig.appVersionState.shouldForceUpdate }
     
     // MARK: - Initializer
-    init(configService: ConfigService, socketConsumer: T) {
+    init(configService: ConfigService, socketConsumer: CoinSocketDataConsumer) {
         self.configService = configService
         self.socketConsumer = socketConsumer
     }

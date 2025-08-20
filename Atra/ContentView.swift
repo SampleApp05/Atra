@@ -12,11 +12,16 @@ struct ContentView: View {
     
     init(configService: ConfigService) {
         let client = WebSocketService(connector: URLSession(configuration: .default))
-        let storage = CoinDataStorage()
+        let coinCache = CoinCacheService()
+        let watchlistService = WatchlistProviderService()
         
         viewModel = AppViewModel(
             configService: configService,
-            socketConsumer: CoinDataConsumer(client: client, dataStorage: storage)
+            socketConsumer: CoinDataConsumer(
+                client: client,
+                cacheProvider: coinCache,
+                watchlistProvider: watchlistService
+            )
         )
     }
     
