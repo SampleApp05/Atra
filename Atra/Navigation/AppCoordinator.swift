@@ -15,14 +15,16 @@ enum AppFlow: CaseIterable {
 @Observable
 final class AppCoordinator: TabViewContentProvider {
     private let config: AppConfig
+    private let dependencyProvider: DependencyProvider
     
     private(set) var tabs = AppFlow.allCases
     var selectedFlow: AppFlow = .watchilists
     
     var containerView: some View { TabViewContainerView(provider: self) }
     
-    init(config: AppConfig) {
+    init(config: AppConfig, dependencyProvider: DependencyProvider) {
         self.config = config
+        self.dependencyProvider = dependencyProvider
     }
     
     func start(with initial: AppFlow = .watchilists, tabs: [AppFlow]? = nil) {
@@ -40,7 +42,12 @@ final class AppCoordinator: TabViewContentProvider {
     func content(for flow: AppFlow) -> some View {
         switch flow {
         case .watchilists:
-            Color.red
+            let viewModel = WatchlistsView.ViewModel(
+                cacheProvider: dependencyProvider.coinCacheProvider,
+                watchlistProvider: dependencyProvider.watchlistProvider
+            )
+            
+            WatchlistsView(viewModel: viewModel)
         case .staking:
             Color.purple
         }

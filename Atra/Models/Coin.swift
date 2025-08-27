@@ -18,7 +18,8 @@ extension JSONDecoder {
 struct Coin: Codable, Equatable {
     let id: String
     let name: String
-    let image: String
+    let symbol: String
+    let imageURL: URL
     
     let price: Double
     let marketCap: Double
@@ -30,7 +31,8 @@ struct Coin: Codable, Equatable {
     enum CodingKeys : String, CodingKey {
         case id
         case name
-        case image
+        case symbol
+        case imageURL = "image"
         case price = "current_price"
         case marketCap = "market_cap"
         case marketCapRank = "market_cap_rank"

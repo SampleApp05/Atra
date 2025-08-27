@@ -56,11 +56,21 @@
 			);
 			target = 8BC6E0D32E03EEC300173F9B /* AtraTests */;
 		};
+		8BF454032E57603B005BB919 /* Exceptions for "Atra" folder in "Atra" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8BC6E0C32E03EEC100173F9B /* Atra */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8BC6E0C62E03EEC100173F9B /* Atra */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8BF454032E57603B005BB919 /* Exceptions for "Atra" folder in "Atra" target */,
+			);
 			path = Atra;
 			sourceTree = "<group>";
 		};
@@ -446,6 +456,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Atra/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Atra/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Atra;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -480,6 +491,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Atra/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Atra/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Atra;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

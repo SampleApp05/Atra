@@ -9,13 +9,18 @@ import SwiftUI
 
 @main
 struct AtraApp: App {
+    let dependencyProvider = DependencyService(
+        coinCacheProvider: CoinCacheService(),
+        watchlistProvider: WatchlistProviderService()
+    )
+    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     let logger: Logger = Logger()
     
     var body: some Scene {
         WindowGroup {
             LoggerContext.$current.withValue(logger) {
-                ContentView(configService: delegate.configService)
+                ContentView(configService: delegate.configService, dependencyProvider: dependencyProvider)
             }
         }
     }
