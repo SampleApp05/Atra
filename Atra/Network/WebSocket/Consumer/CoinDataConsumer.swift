@@ -53,7 +53,8 @@ final class CoinDataConsumer: CoinSocketDataConsumer {
         case .cacheUpdate(let data):
             cacheProvider.updateCache(with: data.data)
         case .watchlistUpdate(let data):
-            let watchlist = Watchlist(id: data.id, name: data.name, origin: .remote, coins: data.coins)
+            guard let name = try? Watchlist.Name(with: data.name) else { return }
+            let watchlist = Watchlist(id: data.id, name: name, origin: .remote, coins: data.coins)
             watchlistProvider.updateRemoteWatchlist(watchlist)
         case .error(let error):
             print("Received error: \(error)")

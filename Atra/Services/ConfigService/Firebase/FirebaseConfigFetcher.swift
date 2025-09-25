@@ -27,10 +27,10 @@ extension RemoteConfig: FirebaseConfigFetcher {
     }
     
     func applyUpdates() async throws {
-        try await Self.remoteConfig().activate()
+        try await instance.activate()
     }
     
-    func addUpdateListener(_ handler: @escaping (RemoteConfigUpdate?, (any Error)?) -> Void) {
-        Self.remoteConfig().addOnConfigUpdateListener(remoteConfigUpdateCompletion: handler)
+    func addUpdateListener(_ handler: @escaping (RemoteConfigUpdate?, (Error)?) -> Void) {
+        instance.addOnConfigUpdateListener(remoteConfigUpdateCompletion: handler)
     }
 }

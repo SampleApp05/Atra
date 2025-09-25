@@ -8,6 +8,10 @@
 import SwiftUI
 
 extension View {
+    func trackSize(_ size: Binding<CGSize>) -> some View {
+        modifier(SizeTrackerModifier(size: size))
+    }
+    
     func rounded(_ style: RadiusStyle) -> some View {
         modifier(RoundedModifier(style: style))
     }

@@ -50,6 +50,8 @@ final class WatchlistProviderService: WatchlistProvider {
     // MARK: - Public
     // using UUID ensures unique watchlists
     func createWatchlist(with name: String) {
+        guard let name = try? Watchlist.Name(with: name) else { return }
+        
         let id = UUID()
         let watchlist = Watchlist(id: id, name: name, origin: .local, coins: [])
         

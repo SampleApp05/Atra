@@ -12,8 +12,9 @@ extension WatchlistsView {
     final class ViewModel {
         let cacheProvider: CoinCacheProvider
         let watchlistProvider: WatchlistProvider
-        let formatter: ValueFormatter = CoinValueFormatter()
+        let formatter: ValueFormatter
         
+        var isShowingCreateSheet: Bool = false
         var selectedTab: UUID?
         var watchlists: [UUID] { watchlistProvider.watchlistIds }
         
@@ -22,9 +23,15 @@ extension WatchlistsView {
             return fetchWatchlist(for: selectedTab)?.coins ?? []
         }
         
-        init(cacheProvider: CoinCacheProvider, watchlistProvider: WatchlistProvider) {
+        init(
+            cacheProvider: CoinCacheProvider,
+            watchlistProvider: WatchlistProvider,
+            formatter: ValueFormatter = CoinValueFormatter()
+        ) {
             self.cacheProvider = cacheProvider
             self.watchlistProvider = watchlistProvider
+            self.formatter = formatter
+            
             selectedTab = watchlists.first
         }
         
@@ -33,11 +40,15 @@ extension WatchlistsView {
             watchlistProvider.fetchWatchlist(with: id)
         }
         
-        func fetchWatchlistName(for id: UUID) -> String? {
-            fetchWatchlist(for: id)?.name
+        // MARK: - Public
+        func showCreateSheet() {
+            isShowingCreateSheet = true
         }
         
-        // MARK: - Public
+        func fetchWatchlistName(for id: UUID) -> String? {
+            fetchWatchlist(for: id)?.name.value
+        }
+        
         func fetchCellConfig(for id: String) -> CoinCellView.Config? {
             guard let coin = cacheProvider.fetchData(for: id) else { return nil }
             

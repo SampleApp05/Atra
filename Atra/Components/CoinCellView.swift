@@ -48,7 +48,6 @@ struct CoinCellView: View {
         }
         .frame(width: 45, height: 45)
         .rounded(.all(10))
-        .padding(.trailing, 10)
     }
     
     private var headlineView: some View {
@@ -57,7 +56,7 @@ struct CoinCellView: View {
             Spacer()
             Text(config.price)
         }
-        .font(.primary, size: .title3, weight: .bold)
+        .font(.secondary, size: .title3, weight: .bold)
         .lineLimit(1)
         .minimumScaleFactor(0.65)
         .foregroundStyle(.primaryText)
@@ -84,11 +83,11 @@ struct CoinCellView: View {
                     .font(.secondary, size: .subheadline, weight: .semiBold)
             }
         }
-        .padding(.horizontal, 5)
+        .padding(.trailing, 5)
     }
     
     var body: some View {
-        HStack(alignment: .center, spacing: 0) {
+        HStack(alignment: .center, spacing: 10) {
             logoView
             
             VStack(alignment: .leading, spacing: 0) {

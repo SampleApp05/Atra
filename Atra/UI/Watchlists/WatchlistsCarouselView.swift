@@ -23,26 +23,25 @@ struct WatchlistsCarouselView: View {
     }
     
     var body: some View {
-        ScrollViewReader { (scrollReader) in
-            ZStack {
-                Spacer().containerRelativeFrame([.horizontal])
-                LazyHStack(spacing: 0) {
-                    ForEach(watchlistIDs, id: \.self) { id in
-                        if let name = watchlistNameProvider(id) {
-                            WatchlistCardView(name: name, isSelected: selectedTab == id)
-                                .padding(.horizontal, 5)
-                                .tag(id)
-                                .onTapGesture {
-                                    withAnimation {
-                                        selectedTab = id
-                                        scrollReader.scrollTo(id)
-                                    }
+        ZStack {
+            Spacer().containerRelativeFrame([.horizontal])
+            LazyHStack(spacing: 0) {
+                ForEach(watchlistIDs, id: \.self) { id in
+                    if let name = watchlistNameProvider(id) {
+                        WatchlistCardView(name: name, isSelected: selectedTab == id)
+                            .padding(.horizontal, 5)
+                            .id(id)
+                            .onTapGesture {
+                                withAnimation {
+                                    selectedTab = id
                                 }
-                        }
+                            }
                     }
                 }
             }
+            .padding(.horizontal, 5)
             .scrollable(.horizontal)
+            .scroll(to: selectedTab, on: selectedTab)
             .background(Color.background)
         }
     }

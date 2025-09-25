@@ -7,10 +7,16 @@
 
 import SwiftUI
 
-struct ScrollerModifier<T: Hashable, Value: Equatable>: ViewModifier {
-    let scrollID: T
-    let value: Value
-    let animated: Bool
+struct ScrollerModifier<T: Hashable, Value: Equatable>: ViewModifier, Equatable {
+    private let scrollID: T
+    private let value: Value
+    private let animated: Bool
+    
+    init(scrollID: T, value: Value, animated: Bool) {
+        self.scrollID = scrollID
+        self.value = value
+        self.animated = animated
+    }
     
     func body(content: Content) -> some View {
         ScrollViewReader { (scrollReader) in
@@ -19,7 +25,7 @@ struct ScrollerModifier<T: Hashable, Value: Equatable>: ViewModifier {
                     if animated {
                         withAnimation { scrollReader.scrollTo(scrollID) }
                     } else {
-                        scrollReader.scrollTo(scrollID)
+                        scrollReader.scrollTo(scrollID, anchor: .center)
                     }
                 }
         }

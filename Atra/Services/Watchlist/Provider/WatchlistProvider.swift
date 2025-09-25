@@ -24,3 +24,8 @@ protocol WatchlistProvider: AnyObject, Observable {
     func addToWatchlist(with id: UUID, coin: String)
     func removeFromWatchlist(with id: UUID, coin: String)
 }
+
+protocol WatchlistModifier {
+    func createWatchlist(with name: String)
+    func removeWatchlist(with id: UUID)
+}

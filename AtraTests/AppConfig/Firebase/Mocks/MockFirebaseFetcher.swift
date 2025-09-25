@@ -20,7 +20,7 @@ final class MockFirebaseFetcher: FirebaseConfigFetcher {
     
 
     func setValue(_ value: Data, forKey key: String) {
-        let value = MockRemoteConfigValue(variant: .data(value))
+        let value = MockRemoteConfigValue(data: value)
         values[key] = value
     }
 

@@ -14,7 +14,8 @@ struct CoinDataStorageTests {
         .init(
             id: "bitcoin",
             name: "Bitcoin",
-            image: "some_image_url",
+            symbol: "BTC",
+            imageURL: URL(string: "btc_image_url")!,
             price: 30000.0,
             marketCap: 600000000000,
             marketCapRank: 1,
@@ -24,7 +25,8 @@ struct CoinDataStorageTests {
         .init(
             id: "ethereum",
             name: "Ethereum",
-            image: "another_image_url",
+            symbol: "ETH",
+            imageURL: URL(string: "eth_image_url")!,
             price: 2000.0,
             marketCap: 250000000000,
             marketCapRank: 2,

@@ -11,18 +11,23 @@ struct WatchlistCardView: View {
     let name: String
     let isSelected: Bool
     
+    private var foregroundColor: Color {
+        isSelected ? .primaryText : .secondaryText
+    }
+    
+    private var backgroundColor: Color {
+        isSelected ? .secondaryText : .background
+    }
+    
     var body: some View {
         Text(name)
             .font(.primary, size: .headline, weight: .semiBold)
-            .foregroundStyle(.primaryText)
+            .foregroundStyle(foregroundColor)
             .lineLimit(1)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(Color.background)
-            .bordered(
-                fillStyle: isSelected ? Color.brandPurple : Color.brandGreen,
-                strokeStyle: .init(lineWidth: isSelected ? 2 : 1.5)
-            )
+            .background(backgroundColor)
+            .rounded(.all(10))
     }
 }
 

@@ -17,7 +17,10 @@ final class DependencyService: DependencyProvider {
     let coinCacheProvider: CoinCacheProvider
     let watchlistProvider: WatchlistProvider
     
-    init(coinCacheProvider: CoinCacheProvider, watchlistProvider: WatchlistProvider) {
+    init(
+        coinCacheProvider: CoinCacheProvider,
+        watchlistProvider: WatchlistProvider
+    ) {
         self.coinCacheProvider = coinCacheProvider
         self.watchlistProvider = watchlistProvider
     }
@@ -27,7 +30,10 @@ struct ContentView: View {
     @State private var viewModel: any BaseAppViewModel & SplashViewModel
     let dependencyProvider: DependencyProvider
     
-    init(configService: ConfigService, dependencyProvider: DependencyProvider) {
+    init(
+        configService: ConfigService,
+        dependencyProvider: DependencyProvider
+    ) {
         self.dependencyProvider = dependencyProvider
         
         let client = WebSocketService(connector: URLSession(configuration: .default))
